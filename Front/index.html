@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Red Hat API SERVER</h1>
+
+    <script>
+
+        fetch('package.json')
+        .then(response => response.json())
+        .then(resJSON => {
+            console.log('FIRST');
+            console.log(resJSON.author);
+        });
+
+
+        var answer
+        
+        async function getJSON(){
+            resp = await fetch('package-lock.json');
+            respJSON = await resp.json();
+
+            console.log('SECOND:');
+            console.log(respJSON.version);
+
+            return answer = await respJSON.version;
+            
+
+            
+        }
+
+        getJSON().then(console.log('la version es:' + answer));
+        
+
+        async function hello() { return "Hello" };
+        console.log(hello());
+
+        
+        
+
+
+
+
+        
+        
+
+
+
+    </script>
+       
+</body>
+</html>
+

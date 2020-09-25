@@ -1,88 +1,73 @@
+// Adding Express Web Server
 const express = require('express');
+const app = express();
+
+// Adding Fetch fuction to NodeJS 
 const fetch = require ('node-fetch');
 
+// Adding Parameters nedded for Red Hat API interaction
 const RHAPI = require('./config')
 
 
-const server = express();
-
-server.listen(3000, ()=> console.log("LISTENING AT 3000"));
-
-server.use(express.static('Front'));
-
-
+//Listening with express on port 3000 
+app.listen(3000, ()=> console.log("LISTENING AT 3000-----------------------------------------------------------------------------------------------/////////////////")); 
+app.use(express.static('Front')); app.use(express.json());
 
 
 console.log('Ejecutando Fetch')
 
-// Create the body of the HTTP via POST in type x-www-form-urlencoded because it doesn't accept JSON
-var urlencodedBody = new URLSearchParams();
-urlencodedBody.append("grant_type", "refresh_token");
-urlencodedBody.append("client_id", "rhsm-api");
-urlencodedBody.append("refresh_token", RHAPI.offline_token);
-
-
-async function getRefreshToken(){
+async function getAccessToken(){
+  // Create the body of the HTTP via POST in type x-www-form-urlencoded because it doesn't accept JSON
+  var urlencodedBody = new URLSearchParams();
+  urlencodedBody.append("grant_type", "refresh_token");
+  urlencodedBody.append("client_id", "rhsm-api");
+  urlencodedBody.append("refresh_token", RHAPI.offline_token);
   try{
-    response = await fetch(RHAPI.tokenUrl, {
+    const response = await fetch(RHAPI.tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: urlencodedBody
   });
-  rtaJson = await response.json();
+  const rtaJson = await response.json();
+  console.log('TOKEN RECIBIDO DE REDHAT')
+  //console.log(rtaJson.access_token)
   return rtaJson.access_token;
 
   }
   catch(err){
-    console.log('Error in the call to the API: ' + err)
+    console.log('Error in the call to the API:  ' + err)
   }
   
 }
 
 
-getRefreshToken()
-.then(token => {
-  console.log('Temporary Token:' + token);
-  return token;
+app.post('/', async (request, response) => {
+  console.log('Recibi una request!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  console.log(request.body);
+  tkn = await getAccessToken();
+  response.json({'TUTOKEN' : tkn});
 })
 
 
+tt = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICItNGVsY19WZE5fV3NPVVlmMkc0UXhyOEdjd0l4X0t0WFVDaXRhdExLbEx3In0.eyJleHAiOjE2MDA4NTA4NDUsImlhdCI6MTYwMDg0OTk0NSwiYXV0aF90aW1lIjoxNjAwMDYzODQ4LCJqdGkiOiJlMTZmNTMyZS03OGQ5LTQzMWYtYTRmZC0yMGE3YzQ4YmM1ZWIiLCJpc3MiOiJodHRwczovL3Nzby5yZWRoYXQuY29tL2F1dGgvcmVhbG1zL3JlZGhhdC1leHRlcm5hbCIsImF1ZCI6InJoc20tYXBpIiwic3ViIjoiZjo1MjhkNzZmZi1mNzA4LTQzZWQtOGNkNS1mZTE2ZjRmZTBjZTY6anJvZHJpZ3Vlem5Ac2ljZS5jb20uYXUiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJyaHNtLWFwaSIsInNlc3Npb25fc3RhdGUiOiIxZjhmZTBkMi04YWYwLTQ1NzMtYWQ5NS04ODVmNTVmOGIyOWIiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInBvcnRhbF9tYW5hZ2Vfc3Vic2NyaXB0aW9ucyIsIm9mZmxpbmVfYWNjZXNzIiwicG9ydGFsX21hbmFnZV9jYXNlcyIsImNhbmRsZXBpbl9zeXN0ZW1fYWNjZXNzX3ZpZXdfYWxsIiwicG9ydGFsX3N5c3RlbV9tYW5hZ2VtZW50IiwicG9ydGFsX2Rvd25sb2FkIl19LCJzY29wZSI6Im9mZmxpbmVfYWNjZXNzIiwiYWNjb3VudF9udW1iZXIiOiI1NjkzMTc4IiwiYWNjb3VudF9pZCI6Ijc5NDk5MDMiLCJuYW1lIjoiSm9yZ2UgUm9kcmlndWV6IiwicHJlZmVycmVkX3VzZXJuYW1lIjoianJvZHJpZ3Vlem5Ac2ljZS5jb20uYXUiLCJsb2NhbGUiOiJlbl9VUyIsImdpdmVuX25hbWUiOiJKb3JnZSIsImZhbWlseV9uYW1lIjoiUm9kcmlndWV6IiwiZW1haWwiOiJqcm9kcmlndWV6bkBzaWNlLmNvbS5hdSJ9.LapY6BXk0CFBvmeu6dkoK7qNGlXYCxsLux3GG33SKhJ5FvtxFUGa1AGKcEUUkrxLD22eFvHxd5wCHAnAX9zHgwW6C2Es9GTcNiOlPbssmlKISmOK2G-urrn0q4CW-HCAWRrARXiic1Q_6AtVKWZmIDliWbQIGCtbjst_KKXNAcCOau28-X25BhHEcZn3hxrcb3303m19vM4vN4A-cfGwLKgrFOjVnN1exY4FJ7eB5tHxYMicXq2iNlMfAc8DBNj_lk-NiPmtx7V2mtRTKO67dtd3T9DMLPr5amkaK0sj4zEXGqO0cZNxOcQ0HnXlMygHE-sLiQ9gXgW-BVByVdExHzAynZiN7kELsCmK3YTXxUgAoLB997btIyDNy1sBr1poQL3mT1OJ_Wm-4s-Bwv4FVek0ZTUITbTy1IKlXtxv52TXDXD9bgygDARP2RWSBcvKU1de4fWlPmEJ_5QDFO0KHE6uLANzE__-xayrcPy2trW7zRQED0ujVWZwr8Fb94zaS615EVvkwOAREBgufQzcmGL_1clooa9IxWQ_2kRpoPStvJk2m-yBWqPvwnqA1b_UgjqY0baDK9MKnz2sPrvcFxM5Ldoc7d4hPcnXMSIc4148dgdw2GLvBst0yT2QDybV67mhilWnfca7xji3E03k14N9DxrEM7S-eDI4wzpc39I"
+
+async function getServers(){
+  const result = await fetch('https://api.access.redhat.com/management/v1/systems', {
+    method : 'GET',
+    headers :{
+      'accept' : 'application/json',
+      'Authorization' : 'Bearer ' + tt
+    }
+  })
+  resultJson = await result.json();
+  console.log(resultJson.body[1]);
+
+}
+
+getServers()
 
 
 
-
-
-
-
-
-
-
-
-/*
-var myHeaders = new fetch.Headers();
-myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-myHeaders.append("Cookie", "BIGipServer~prod~keycloak-webssl-https=437390090.64288.0000; sso_origin_dc=origin-sso-rdu2.redhat.com");
-
-var urlencoded = new URLSearchParams();
-urlencoded.append("grant_type", "refresh_token");
-urlencoded.append("client_id", "rhsm-api");
-urlencoded.append("refresh_token", "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICItNGVsY19WZE5fV3NPVVlmMkc0UXhyOEdjd0l4X0t0WFVDaXRhdExLbEx3In0.eyJqdGkiOiJhOGE5ZWRkMi1iYWQzLTQzMjgtYmYxMS00M2YyNmI5YTA2YzQiLCJleHAiOjAsIm5iZiI6MCwiaWF0IjoxNjAwMDYzODYxLCJpc3MiOiJodHRwczovL3Nzby5yZWRoYXQuY29tL2F1dGgvcmVhbG1zL3JlZGhhdC1leHRlcm5hbCIsImF1ZCI6InJoc20tYXBpIiwic3ViIjoiZjo1MjhkNzZmZi1mNzA4LTQzZWQtOGNkNS1mZTE2ZjRmZTBjZTY6anJvZHJpZ3Vlem5Ac2ljZS5jb20uYXUiLCJ0eXAiOiJPZmZsaW5lIiwiYXpwIjoicmhzbS1hcGkiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIxZjhmZTBkMi04YWYwLTQ1NzMtYWQ5NS04ODVmNTVmOGIyOWIiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsicG9ydGFsX21hbmFnZV9zdWJzY3JpcHRpb25zIiwib2ZmbGluZV9hY2Nlc3MiLCJwb3J0YWxfbWFuYWdlX2Nhc2VzIiwiY2FuZGxlcGluX3N5c3RlbV9hY2Nlc3Nfdmlld19hbGwiLCJwb3J0YWxfc3lzdGVtX21hbmFnZW1lbnQiLCJwb3J0YWxfZG93bmxvYWQiXX0sInJlc291cmNlX2FjY2VzcyI6e319.mT6H9gSTpUGEhiHG117PPlR2-fq5CfiILzAjwqUerhUviRpxz87RdLJmlb9YFZM0upvg61Sph7px0k2li1XfYdPlIj2SCk0sjkPOovFbQEXfHhk0tDmfjcUz-1xf7I3i0bQRBGi9flO68yHWrrZ5IAF81gqTHizJ6WZlBtsOK7wIRfEv_NUabieb37mM-81j0EJR04x8adUZqgKhM30-rw_nL_Do9xyKJB8B0AOIxADqVvCm44snX0z1utPYw5xZdVHYeFz05f6092itGuvUuUdnOe1Rbod_b_lqzTXdPYbCaUQJBlN8_-JCQXd4sHAsiGQeCXRWUeX7ZtdOLm6LZ22eFaYGdCeUhVOMx7UhsxlKnK2DrcOLg4fTRv4Hy_6U6klBqoTGCW7wjgT8oj0mvRNj56XGSk95grPY4nWa9wAOEFJqTINIkz1AoN8yffU6UZ4ItMZBU4Xzsnb6oY9N6P0z_7YHo3wwp4Qe35nbB8tzuPnuzjWZYSAugiTaP0xdVHDKvYyHeDIK3aeT1y3MUu3bp7oAra5R--O-3PufiiGjXc4I5YwsMoPhihpTYzm0uhAdhmlvllaRWUWUi9rUq-9D-dcdXSoA3QMKQUOM1mS2YiB9L8L4ZsHOmpdedjPMt9HBpdu1BpiemAl6XLKV-S2uhqlFc5R0LgS6-FM3WSk");
-
-var requestOptions = {
-  method: 'POST',
-  headers: myHeaders,
-  body: urlencoded,
-  redirect: 'follow'
-};
-
-const token = fetch("https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token", requestOptions)
-  .then(response => response.text())
-  .then(result => JSON.parse(result))
-  .then(resultJSON => resultJSON.access_token)
-  .catch(error => console.log('error', error));
-
- console.log(token)
-*/
 

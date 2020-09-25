@@ -1,57 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <h1>Red Hat API SERVER</h1>
 
+    <button id="req_token" onclick="request_token()">Request Temp Token</button>
+
+    <h3 id="token_recibido">Aqui va el token recibido</h3>
+
     <script>
 
-        fetch('package.json')
-        .then(response => response.json())
-        .then(resJSON => {
-            console.log('FIRST');
-            console.log(resJSON.author);
-        });
+        async function request_token(){
+            const data = {
+                'Peticion' : 'Enviame_TOKEN'
+            }
+            try{
+                const reply = await fetch('/', {
+                    method : 'POST',
+                    headers : {
+                        'Content-Type': 'application/json'
+                    },
+                    body :  JSON.stringify(data)
+                })
+
+                const bodyreply = await reply.json();
+                console.log(bodyreply.TUTOKEN)
 
 
-        var answer
-        
-        async function getJSON(){
-            resp = await fetch('package-lock.json');
-            respJSON = await resp.json();
 
-            console.log('SECOND:');
-            console.log(respJSON.version);
+                const pagina = document.querySelector('#token_recibido');
+                console.log(pagina);
 
-            return answer = await respJSON.version;
-            
 
-            
+               
+                
+                pagina.textContent = bodyreply.TUTOKEN;
+
+                
+
+
+
+            }
+            catch{
+                err => console.log(err);
+            }
+
         }
 
-        getJSON().then(console.log('la version es:' + answer));
-        
-
-        async function hello() { return "Hello" };
-        console.log(hello());
-
-        
-        
 
 
 
 
         
-        
+
+        async function sendARequest() {
+            const data = {
+            'NUMERO' : '987654'
+            };
+            const reply = await fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'                    
+                },
+                body: JSON.stringify(data)
+            })
+            const estado = await reply.json()
+            console.log(estado.NUMERO);
+        }
+       
+       
+
+
+
+
+
 
 
 
     </script>
-       
-</body>
-</html>
 
+</body>
+
+</html>

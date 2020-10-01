@@ -10,45 +10,57 @@
 <body>
     <h1>Red Hat API SERVER</h1>
 
-    <button id="req_token" onclick="request_token()">Request Temp Token</button>
+    <button onclick="getServersList()">Request Servers</button>
 
-    <h3 id="token_recibido">Aqui va el token recibido</h3>
+    <h3 id="serversList">Aqui va lista de servidores</h3>
+
+    <button onclick="getServerDetails('7a9b5666-91d1-475e-8094-e189e9c95667')">Request Server Details!</button>
+
+    <h3 id="serverDetails">Aqui van los detalles del server</h3>
 
     <script>
 
-        async function request_token(){
-            const data = {
-                'Peticion' : 'Enviame_TOKEN'
-            }
-            try{
-                const reply = await fetch('/', {
-                    method : 'POST',
-                    headers : {
-                        'Content-Type': 'application/json'
-                    },
-                    body :  JSON.stringify(data)
+        async function getServersList() {
+            try {
+                const response = await fetch('/servers_list', {
+                    method: 'GET'
                 })
+                console.log(response.status); // 200
+                console.log(response.statusText); // OK
+                console.log(response);
 
-                const bodyreply = await reply.json();
-                console.log(bodyreply.TUTOKEN)
-
-
-
-                const pagina = document.querySelector('#token_recibido');
-                console.log(pagina);
-
-
-               
-                
-                pagina.textContent = bodyreply.TUTOKEN;
-
-                
-
-
-
+                if (response.status == 200) {
+                    const bodyResponse = await response.json();
+                    console.log(bodyResponse);
+                    const pagina = document.querySelector('#serversList');
+                    pagina.textContent = bodyResponse.body[0].name;
+                }
             }
-            catch{
-                err => console.log(err);
+            catch {
+                err => console.log('Fetch Error :-S', err);
+            }
+
+        }
+
+        async function getServerDetails(systemUUID) {
+            console.log("Getting SERVER DETAILS FROM CLIENT");
+            try {
+                const response = await fetch('/server_details?uuid=' + systemUUID, {
+                    method: 'GET'
+                })
+                console.log(response.status); // 200
+                console.log(response.statusText); // OK
+                console.log(response);
+
+                if (response.status == 200) {
+                    const bodyResponse = await response.json();
+                    console.log(bodyResponse);
+                    const pagina = document.querySelector('#serverDetails');
+                    pagina.textContent = bodyResponse.body['complianceStatus'];
+                }  
+            }
+            catch {
+                err => console.log('Fetch Error :-S', err);
             }
 
         }
@@ -57,24 +69,16 @@
 
 
 
-        
 
-        async function sendARequest() {
-            const data = {
-            'NUMERO' : '987654'
-            };
-            const reply = await fetch('/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'                    
-                },
-                body: JSON.stringify(data)
-            })
-            const estado = await reply.json()
-            console.log(estado.NUMERO);
-        }
-       
-       
+
+
+
+
+
+
+
+
+
 
 
 

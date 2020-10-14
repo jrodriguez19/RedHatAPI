@@ -5,65 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- Bootstrap CSS -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"> -->
+    <script type="text/javascript" src="index.js"></script>
 </head>
 
+
+
 <body>
-    <h1>Red Hat API SERVER</h1>
+    
+    <div>
+        <button onclick="getAdvisories('100')">Get Data</button>
+        <br><br>
 
-    <button onclick="getServersList()">Request Servers</button>
+        <table id="patching-table" border="1">
+            <tr>
+                <th>Synopsis</th>                
+                <th>AdvisoryId</th>
+                <th>Type</th>
+                <th>Affected</th>
+            </tr>
 
-    <h3 id="serversList">Aqui va lista de servidores</h3>
+        </table>
+
+
+    </div>
+
+
+
+
+
+
+    <p>---------------------------------------------------------------------</p>
+    <br><br><br><br><br>
+    <button onclick="getErrata('100')">Request Errata</button>
+    <h3 id="errata">Aqui va la Errata</h3>
+
 
     <button onclick="getServerDetails('7a9b5666-91d1-475e-8094-e189e9c95667')">Request Server Details!</button>
-
     <h3 id="serverDetails">Aqui van los detalles del server</h3>
 
-    <script>
 
-        async function getServersList() {
-            try {
-                const response = await fetch('/servers_list', {
-                    method: 'GET'
-                })
-                console.log(response.status); // 200
-                console.log(response.statusText); // OK
-                console.log(response);
+    <div>
+        <button onclick="getServersList()">Servers List Table</button>
+        <table id="servers_list" border="1">
+            <tr>
+                <th>Server Name</th>
+                <th>UUID</th>
+                <th>Security_Updates</th>
+                <th>Enhancements</th>
+                <th>Bug_Fixes</th>
+            </tr>
+        </table>
 
-                if (response.status == 200) {
-                    const bodyResponse = await response.json();
-                    console.log(bodyResponse);
-                    const pagina = document.querySelector('#serversList');
-                    pagina.textContent = bodyResponse.body[0].name;
-                }
-            }
-            catch {
-                err => console.log('Fetch Error :-S', err);
-            }
-
-        }
-
-        async function getServerDetails(systemUUID) {
-            console.log("Getting SERVER DETAILS FROM CLIENT");
-            try {
-                const response = await fetch('/server_details?uuid=' + systemUUID, {
-                    method: 'GET'
-                })
-                console.log(response.status); // 200
-                console.log(response.statusText); // OK
-                console.log(response);
-
-                if (response.status == 200) {
-                    const bodyResponse = await response.json();
-                    console.log(bodyResponse);
-                    const pagina = document.querySelector('#serverDetails');
-                    pagina.textContent = bodyResponse.body['complianceStatus'];
-                }  
-            }
-            catch {
-                err => console.log('Fetch Error :-S', err);
-            }
-
-        }
+    </div>
 
 
 
@@ -73,22 +69,15 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    </script>
-
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script> -->
 </body>
 
 </html>

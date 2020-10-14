@@ -15,7 +15,19 @@ app.use(express.static('Front')); app.use(express.json());
 
 
 //returned value in case of catching an error
-const ERRORVALUE = 'ERROR IN THE COMMUNICATION WITH THE RED HAT API';
+const ERRORVALUE = '-1';
+
+
+//Date last time we received a token
+let timeLastToken
+
+//Last temp Token
+let tempToken
+
+//Max Time Temporary Token is valid: 300000 ms
+const MAXTIMETEMPTOKEN = 280000;
+
+
 
 /**
  * Get temporary Token to perform API calls to Red Hat 
@@ -36,39 +48,51 @@ async function getAccessToken() {
       body: urlencodedBody
     });
     const responseJson = await response.json();
-    console.log('TOKEN RECIBIDO DE REDHAT')
+    console.log('TOKEN RECIBIDO DE REDHAT');
     //console.log(response);
+    timeLastToken = new Date();
     return responseJson.access_token;
   }
   catch (err) {
     console.log('ERROR GETTING THE TOKEN:  ' + err)
     return ERRORVALUE;
   }
-
 }
 
 /**
  * Function to perform the api calls to Red Hat 
  * @return json response from the API call
  * */
-async function performAPICall(endPoint, token) {
+async function performAPICall(endPoint) {
+  
+  if(timeLastToken != null){
+    currentTime = new Date();
+    timeElapsedMs = (currentTime - timeLastToken) / 1000;
+    if(timeElapsedMs > MAXTIMETEMPTOKEN){
+      tempToken = await getAccessToken();
+    }
+  }
+  else{
+    tempToken = await getAccessToken();
+  }
+
   try {
     const response = await fetch(endPoint, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': 'Bearer ' + tempToken
       }
     });
-    const reponseJson = await response.json();
+    const responseJson = await response.json();
     console.log('RESPUESTA!!!!!!! RECIBIDA DE REDHAT')
-    console.log(reponseJson)
-    return reponseJson;
+    //console.log(reponseJson)
+    return responseJson;
   }
   catch (err) {
-  console.log('ERROR CALLING THE API:  ' + err)
-  return ERRORVALUE;
-}
+    console.log('ERROR CALLING THE API:  ' + err)
+    return ERRORVALUE;
+  }
 }
 
 
@@ -76,8 +100,8 @@ async function performAPICall(endPoint, token) {
  * Get list of servers
  */
 app.get('/servers_list', async (request, response) => {
-  refreshToken = await getAccessToken();
-  callResponse = await performAPICall(RHAPI.APICallUrl + '/systems', refreshToken)
+
+  callResponse = await performAPICall(RHAPI.APICallUrl + '/systems')
   //console.log(callResponse)
   console.log('Rta de RD hat servers available completa')
   response.send(callResponse);
@@ -85,19 +109,27 @@ app.get('/servers_list', async (request, response) => {
 
 
 /**
- * Get server details
+ * Get server details by UUID
  */
 app.get('/server_details', async (request, response) => {
   const systemUUID = request.query['uuid'];
-  console.log(systemUUID)
-  refreshToken = await getAccessToken();
-  callResponse = await performAPICall(RHAPI.APICallUrl + '/systems/' + systemUUID , refreshToken);
+  callResponse = await performAPICall(RHAPI.APICallUrl + '/systems/' + systemUUID);
   //console.log(callResponse);
   console.log('Rta de RED hat servers available completa');
   response.send(callResponse);
 })
 
 
+/**
+ * Get errata
+ */
+app.get('/errata', async (request, response) => {
+  const limit = request.query['limit'];
+  let callResponse = await performAPICall(RHAPI.APICallUrl + '/errata?limit=' + limit + '&offset=0');
+  console.log('RESPUESTA ERRATA de RED HAT RECIBIDA: \n\n'+ callResponse);
+  response.send(callResponse);
+})
+//"https://api.access.redhat.com/management/v1/errata/RHSA-2019:2033/systems"
 
 /*
 app.post('/', async (request, response) => {

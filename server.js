@@ -10,7 +10,7 @@ const RHAPI = require('./config')
 
 
 //Listening with express on port 3000 
-app.listen(3000, () => console.log("LISTENING AT 3000-----------------------------------------------------------------------------------------------/////////////////"));
+app.listen(3000, () => console.log("LISTENING AT 3000"));
 app.use(express.static('Front')); app.use(express.json());
 
 
@@ -48,7 +48,7 @@ async function getAccessToken() {
       body: urlencodedBody
     });
     const responseJson = await response.json();
-    console.log('TOKEN RECIBIDO DE REDHAT');
+    console.log('TOKEN Received');
     //console.log(response);
     timeLastToken = new Date();
     return responseJson.access_token;
@@ -85,7 +85,7 @@ async function performAPICall(endPoint) {
       }
     });
     const responseJson = await response.json();
-    console.log('RESPUESTA!!!!!!! RECIBIDA DE REDHAT')
+    console.log('Reply received from RedHat')
     //console.log(reponseJson)
     return responseJson;
   }
@@ -103,7 +103,6 @@ app.get('/servers_list', async (request, response) => {
 
   callResponse = await performAPICall(RHAPI.APICallUrl + '/systems')
   //console.log(callResponse)
-  console.log('Rta de RD hat servers available completa')
   response.send(callResponse);
 })
 
@@ -115,7 +114,6 @@ app.get('/server_details', async (request, response) => {
   const systemUUID = request.query['uuid'];
   callResponse = await performAPICall(RHAPI.APICallUrl + '/systems/' + systemUUID);
   //console.log(callResponse);
-  console.log('Rta de RED hat servers available completa');
   response.send(callResponse);
 })
 
@@ -126,17 +124,7 @@ app.get('/server_details', async (request, response) => {
 app.get('/errata', async (request, response) => {
   const limit = request.query['limit'];
   let callResponse = await performAPICall(RHAPI.APICallUrl + '/errata?limit=' + limit + '&offset=0');
-  console.log('RESPUESTA ERRATA de RED HAT RECIBIDA: \n\n'+ callResponse);
+  console.log('reply received: \n\n'+ callResponse);
   response.send(callResponse);
 })
-//"https://api.access.redhat.com/management/v1/errata/RHSA-2019:2033/systems"
 
-/*
-app.post('/', async (request, response) => {
-  console.log('Recibi una request!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-  console.log(request.body);
-  tkn = await getAccessToken();
-  response.json({ 'TUTOKEN': tkn });
-})
-
-*/
